@@ -1,79 +1,153 @@
-import requests
-import math
-from bs4 import BeautifulSoup
-import random
+champList = [
+    "aatr|Aatrox",
+    "ahri|Ahri",
+    "akal|Akali",
+    "alis|Alistar",
+    "amum|Amumu",
+    "aniv|Anivia",
+    "anni|Annie",
+    "ashe|Ashe",
+    "aure|AurelionSol",
+    "azir|Azir",
+    "bard|Bard",
+    "blit|Blitzcrank",
+    "bran|Brand",
+    "brau|Braum",
+    "cait|Caitlyn",
+    "cami|Camille",
+    "cass|Cassiopeia",
+    "chog|Chogath",
+    "cork|Corki",
+    "dari|Darius",
+    "dian|Diana",
+    "drmu|DrMundo",
+    "drav|Draven",
+    "ekko|Ekko",
+    "elis|Elise",
+    "evel|Evelynn",
+    "ezre|Ezreal",
+    "fidd|Fiddlesticks",
+    "fior|Fiora",
+    "fizz|Fizz",
+    "gali|Galio",
+    "gang|Gangplank",
+    "gare|Garen",
+    "gnar|Gnar",
+    "grag|Gragas",
+    "grav|Graves",
+    "heca|Hecarim",
+    "heim|Heimerdinger",
+    "illa|Illaoi",
+    "irel|Irelia",
+    "iver|Ivern",
+    "jann|Janna",
+    "jarv|JarvanIV",
+    "jax|Jax",
+    "jayc|Jayce",
+    "jhin|Jhin",
+    "jinx|Jinx",
+    "kais|Kai'Sa",
+    "kali|Kalista",
+    "karm|Karma",
+    "kart|Karthus",
+    "kass|Kassadin",
+    "kata|Katarina",
+    "kayl|Kayle",
+    "kayn|Kayn",
+    "kenn|Kennen",
+    "khaz|Khazix",
+    "kind|Kindred",
+    "kled|Kled",
+    "kogm|KogMaw",
+    "lebl|LeBlanc",
+    "lees|LeeSin",
+    "leon|Leona",
+    "liss|Lissandra",
+    "luci|Lucian",
+    "lulu|Lulu",
+    "lux|Lux",
+    "malp|Malphite",
+    "malz|Malzahar",
+    "maok|Maokai",
+    "mast|MasterYi",
+    "miss|MissFortune",
+    "mord|Mordekaiser",
+    "morg|Morgana",
+    "nami|Nami",
+    "nasu|Nasus",
+    "naut|Nautilus",
+    "neek|Neeko",
+    "nida|Nidalee",
+    "noct|Nocturne",
+    "nunu|Nunu",
+    "olaf|Olaf",
+    "oria|Orianna",
+    "ornn|Ornn",
+    "pant|Pantheon",
+    "popp|Poppy",
+    "pyke|Pyke",
+    "quin|Quinn",
+    "raka|Rakan",
+    "ramm|Rammus",
+    "reks|Rek'Sai",
+    "rene|Renekton",
+    "reng|Rengar",
+    "rive|Riven",
+    "rumb|Rumble",
+    "ryze|Ryze",
+    "seju|Sejuani",
+    "shac|Shaco",
+    "shen|Shen",
+    "shyv|Shyvana",
+    "sing|Singed",
+    "sion|Sion",
+    "sivi|Sivir",
+    "skar|Skarner",
+    "sona|Sona",
+    "sora|Soraka",
+    "swai|Swain",
+    "synd|Syndra",
+    "tahm|TahmKench",
+    "tali|Taliyah",
+    "talo|Talon",
+    "tari|Taric",
+    "teem|Teemo",
+    "thre|Thresh",
+    "tris|Tristana",
+    "trun|Trundle",
+    "tryn|Tryndamere",
+    "twis|TwistedFate",
+    "twit|Twitch",
+    "udyr|Udyr",
+    "urgo|Urgot",
+    "varu|Varus",
+    "vayn|Vayne",
+    "veig|Veigar",
+    "velk|Velkoz",
+    "vi|Vi",
+    "vikt|Viktor",
+    "vlad|Vladimir",
+    "voli|Volibear",
+    "warw|Warwick",
+    "wuko|Wukong",
+    "xaya|Xayah",
+    "xera|Xerath",
+    "xinz|XinZhao",
+    "yasu|Yasuo",
+    "yori|Yorick",
+    "zac|Zac",
+    "zed|Zed",
+    "zigg|Ziggs",
+    "zile|Zilean",
+    "zoe|Zoe",
+    "zyra|Zyra"
+]
 
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'
 
-headers = {
-    'User-Agent': USER_AGENT
-}
-champ = ""
-attempt = 0
-
-
-def gen_champ():
-    champ_list = {
-
-    }
-    global champ
-    champ = champ_list.get(random.randrange(0, 137), 5)
-    global attempt
-    attempt = 0
-    print(champ)
-    if champ == "":
-        return "New Champ"
-    else:
-        return "Welcome to Guess the Champ"
-
-
-def hint():
-    if champ == "":
-        return "The Game has not Started yet!"
-    url = 'http://leagueoflegends.wikia.com/wiki/{}/Quotes'.format(champ)
-    resp = requests.get(url, headers=headers)
-    soup = BeautifulSoup(resp.text, 'html.parser')
-
-    movement = soup.find_all("ul")
-
-    lines = []
-    for x in range(19, len(movement)-13):
-        # print("------------------------------------------------------------"+str(x))
-        for line in movement[x].find_all("i"):
-            # print(line.text)
-            lines.append(line.text)
-
-    quote = lines[random.randrange(0, len(lines) - 1)]
-    while champ in quote:
-        quote = lines[random.randrange(0, len(lines) - 1)]
-    global attempt
-    attempt += 1
-    # print(attempt)
-    return quote
-
-
-def answer(name):
-    if answer_mod(name.lower()) == champ.lower():
-        score = 50/math.pow(attempt+1, 2)
-        gen_champ()
-        return "That is correct! You earned {} points".format(str(round(score, 2))+"\n new champ generated")
-    elif name == "":
-        temp = champ
-        gen_champ()
-        return "the answer was {}".format(temp)
-    else:
-        return "That's not the right answer"
-
-
-def answer_mod(name):
-    if name.find(" ") == -1:
-        return name
-    name.replace(" ", "_")
-    return name
-
-
-if __name__ == "__main__":
-    gen_champ()
-    print(hint())
-    print(hint())
-    print(hint())
+def includes(select):
+    select = ''.join(list(filter(str.isalnum, select)))
+    select = select.lower()[:4]
+    for name in champList:
+        if name.startswith(select):
+            return name.split('|')[1]
+    return False
