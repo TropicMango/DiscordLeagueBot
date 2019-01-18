@@ -1,4 +1,4 @@
-g:4320
+g:6395
 ID:2
 Neeko lv:1|100|0
 Rammus lv:1|100|0

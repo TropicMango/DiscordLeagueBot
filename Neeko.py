@@ -22,34 +22,34 @@ latest_channel = ''
 async def summon_minions():
     global cs
     global arr
+    global invader
+    invade_val = random.randrange(60, 300)
+    i = 0
     while True:
         await asyncio.sleep(random.randrange(5, 30))
+        i += 1
+
         if clearing_id == '':
             arr[random.randrange(len(arr))] += 1
             cs += 1
             await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
+        if i == invade_val:
+            await asyncio.sleep(random.randrange(600, 1200))
+            invader = LolChampList.generate()
+            if random.random() > 0.7:
+                invader += '_{}'.format(random.randrange(1, LolChampList.get_skins(invader)))
+            else:
+                invader += '_0'
+            embed = discord.Embed()
+            embed.title = "Oh no we got a invader!"
+            embed.description = "use n~c <champion> to challenge him"
+            embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
+            print("https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
+            await bot.send_message(latest_channel, embed=embed)
+            invade_val = random.randrange(60, 300)
 
-async def summon_champion():
-    global invader
-    invader = LolChampList.generate()
-    if random.random() > 0.7:
-        invader += '_{}'.format(random.randrange(1, LolChampList.get_skins(invader)))
-    else:
-        invader += '_0'
-    embed = discord.Embed()
-    embed.title = "Oh no we got a invader!"
-    embed.description = "use n~c <champion> to challenge him"
-    embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
-    print("https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
-    await bot.send_message(latest_channel, embed=embed)
 
-    # while True:
-    #     await asyncio.sleep(random.randrange(600, 1200))
-    #     if challenge_id == '':
-    #         arr[random.randrange(len(arr))] += 1
-    #         cs += 1
-    #         await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
 
 @bot.event
@@ -153,8 +153,8 @@ async def clear(ctx):
         cs -= 1
         await bot.edit_message(clear_msg, "{} cleared {} minions\n{} minions left".format(player, my_cs, cs))
         await asyncio.sleep(1)  # change this to stat check
-    dataManager.add_gold(ctx.message.author.id, my_cs * 12)
-    await bot.say("{} earned {} gold for clearing~".format(player, my_cs*12))
+    dataManager.add_gold(ctx.message.author.id, my_cs * 5)
+    await bot.say("{} earned {} gold for clearing~".format(player, my_cs*5))
 
     if cs == 0:
         await bot.change_presence(game=discord.Game(name='Neeko no minions'))
@@ -253,10 +253,10 @@ async def cheat(ctx):
     # await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
 
-@bot.command(pass_context=True)
-async def test(ctx):
-    global latest_channel
-    latest_channel = ctx.message.channel
-    await summon_champion()
+# @bot.command(pass_context=True)
+# async def test(ctx):
+#     global latest_channel
+#     latest_channel = ctx.message.channel
+#     await summon_champion()
 
 bot.run('NTM0OTg5MTE4NzkxMjIxMjQ4.DyBn7g.q8t70y3DtaZLNw1HKCmQfY2t3Zk')
