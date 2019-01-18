@@ -1,4 +1,4 @@
 g:600
 ID:0
-Katarina:100|10
-Syndra:100|4
+Katarina lv:1|100|10
+Syndra lv:1|100|4

@@ -1,3 +1,5 @@
+import random
+
 champList = [
     "aatr|Aatrox|5",
     "ahri|Ahri|9",
@@ -46,7 +48,7 @@ champList = [
     "jayc|Jayce|4",
     "jhin|Jhin|4",
     "jinx|Jinx|6",
-    "kais|Kai'Sa|3",
+    "kais|Kaisa|3",
     "kali|Kalista|3",
     "karm|Karma|7",
     "kart|Karthus|6",
@@ -89,7 +91,7 @@ champList = [
     "quin|Quinn|4",
     "raka|Rakan|3",
     "ramm|Rammus|8",
-    "reks|Rek'Sai|2",
+    "reks|RekSai|2",
     "rene|Renekton|10",
     "reng|Rengar|4",
     "rive|Riven|9",
@@ -106,7 +108,7 @@ champList = [
     "sona|Sona|8",
     "sora|Soraka|9",
     "swai|Swain|4",
-    "syla|Sylas|0",
+    # "syla|Sylas|0",
     "synd|Syndra|6",
     "tahm|TahmKench|2",
     "tali|Taliyah|2",
@@ -130,7 +132,7 @@ champList = [
     "vlad|Vladimir|8",
     "voli|Volibear|5",
     "warw|Warwick|10",
-    "wuko|Wukong|6",
+    "wuko|Wukong|5",
     "xaya|Xayah|3",
     "xera|Xerath|4",
     "xinz|XinZhao|8",
@@ -153,3 +155,16 @@ def includes(select):
         if name.startswith(select):
             return name.split('|')[1]
     return False
+
+
+def generate():
+    return champList[random.randrange(0, len(champList))].split('|')[1]
+
+
+def get_skins(champ):
+    select = champ.lower()[:4]
+    for name in champList:
+        if name.startswith(select):
+            print(int(name.split('|')[2]))
+            return int(name.split('|')[2])
+    raise NameError

@@ -1,6 +1,6 @@
-g:1452
-ID:3
-Neeko:100|0
-Rammus:100|0
-Teemo:100|0
-Zed:100|0
+g:4320
+ID:2
+Neeko lv:1|100|0
+Rammus lv:1|100|0
+Teemo lv:1|100||0
+Zed lv:1|100|0

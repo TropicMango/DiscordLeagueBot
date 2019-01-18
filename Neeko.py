@@ -14,6 +14,9 @@ cs = 0
 arr = [0, 0, 0]
 select = ''
 clearing_id = ''
+challenge_id = ''
+invader = ''
+latest_channel = ''
 
 
 async def summon_minions():
@@ -25,6 +28,28 @@ async def summon_minions():
             arr[random.randrange(len(arr))] += 1
             cs += 1
             await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
+
+
+async def summon_champion():
+    global invader
+    invader = LolChampList.generate()
+    if random.random() > 0.7:
+        invader += '_{}'.format(random.randrange(1, LolChampList.get_skins(invader)))
+    else:
+        invader += '_0'
+    embed = discord.Embed()
+    embed.title = "Oh no we got a invader!"
+    embed.description = "use n~c <champion> to challenge him"
+    embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
+    print("https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
+    await bot.send_message(latest_channel, embed=embed)
+
+    # while True:
+    #     await asyncio.sleep(random.randrange(600, 1200))
+    #     if challenge_id == '':
+    #         arr[random.randrange(len(arr))] += 1
+    #         cs += 1
+    #         await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
 
 @bot.event
@@ -56,7 +81,7 @@ async def start(ctx):
     embed = discord.Embed(discription="welcome to the rift", color=0x71f442)
     embed.add_field(name="Welcome to the Rift {}".format(str(ctx.message.author)[:-5]),
                     value="Neeko is joyful to accompany you", inline=False)
-    embed.add_field(name="How to Start", value="use n~pick <champion> to select your champion (caps required)")
+    embed.add_field(name="How to Start", value="use n~pick <champion> to select your champion")
     await bot.say(embed=embed)
 
 
@@ -152,6 +177,21 @@ async def steal(ctx):
 
 
 @bot.command(pass_context=True)
+async def c(ctx):
+    if invader == '':
+        await bot.say("Currently no challengers")
+        return
+    if invader.split('_')[0].lower() != ''.join(list(filter(str.isalnum, ctx.message.content.split(' ')[1]))):
+        await bot.say("Not the right champion")
+        return
+    await bot.say("Neeko doesn't know how fighting works yet...")
+    await bot.say("But they join your team~")
+    embed = discord.Embed()
+    embed.title = '{} decided to join your team! (not really)'.format(invader.split('_')[0])
+    await bot.say(embed=embed)
+
+
+@bot.command(pass_context=True)
 async def gold(ctx):
     if not dataManager.started(ctx.message.author.id):
         await bot.say("Sorry you don't have any champions...")
@@ -195,6 +235,13 @@ async def info(ctx):
     await bot.say(embed=embed)
 
 
+@bot.event
+async def on_message(message):
+    global latest_channel
+    latest_channel = message.channel
+    await bot.process_commands(message)
+
+
 # ------------------------------------------ Testing Commands ----------------------------------------------
 
 @bot.command(pass_context=True)
@@ -205,5 +252,11 @@ async def cheat(ctx):
     # await bot.say('<@!{}> should be reported for spawning 10 minions'.format(ctx.message.author.id))
     # await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
+
+@bot.command(pass_context=True)
+async def test(ctx):
+    global latest_channel
+    latest_channel = ctx.message.channel
+    await summon_champion()
 
 bot.run('NTM0OTg5MTE4NzkxMjIxMjQ4.DyBn7g.q8t70y3DtaZLNw1HKCmQfY2t3Zk')
