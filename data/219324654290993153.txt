@@ -1,0 +1,4 @@
+g:600
+ID:0
+Katarina:100|10
+Syndra:100|4

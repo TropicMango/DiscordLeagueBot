@@ -1,11 +1,8 @@
 import discord
-import time
 import asyncio
 import random
 from discord.ext import commands
-from DiscordLeague import LolChampList
-from DiscordLeague import dataManager
-
+from DiscordLeague import LolChampList, dataManager
 
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
@@ -16,15 +13,15 @@ bot = commands.Bot(command_prefix='n~', description=description)
 cs = 0
 arr = [0, 0, 0]
 select = ''
-clearing = ''
+clearing_id = ''
 
 
 async def summon_minions():
     global cs
     global arr
     while True:
-        await asyncio.sleep(random.randrange(10, 60))
-        if clearing == '':
+        await asyncio.sleep(random.randrange(5, 30))
+        if clearing_id == '':
             arr[random.randrange(len(arr))] += 1
             cs += 1
             await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
@@ -36,7 +33,7 @@ async def on_ready():  # when ready it prints the username, id, and starts the s
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await bot.change_presence(game=discord.Game(name='Neeko sees no minions'))
+    await bot.change_presence(game=discord.Game(name='Not being Neeko~'))
     await summon_minions()
 
 
@@ -48,7 +45,7 @@ async def minions():
 
 @bot.command(pass_context=True)
 async def ping(ctx):
-    await bot.say('Neeko thinks {} talks too much'.format(str(ctx.message.author)[:-5]))
+    await bot.say('Neeko thinks <@!{}> talks too much'.format(ctx.message.author.id))
     t = await bot.say('Pong!')
     ms = (t.timestamp - ctx.message.timestamp).total_seconds() * 1000
     await bot.edit_message(t, new_content='Pong! Took: {}ms'.format(int(ms)))
@@ -65,7 +62,7 @@ async def start(ctx):
 
 @bot.command(pass_context=True)
 async def pick(ctx):
-    if dataManager.started(str(ctx.message.author)):
+    if dataManager.started(ctx.message.author.id):
         await bot.say('Sorry you already picked a champion')
         return
 
@@ -73,7 +70,7 @@ async def pick(ctx):
     msg_cont = ctx.message.content[7:]
     hover_champ = LolChampList.includes(msg_cont)
 
-    if str(ctx.message.author) != select.split('|')[0] and select != '':
+    if ctx.message.author.id != select.split('|')[0] and select != '':
         await bot.say('Uh... Some one else is picking right now, Neeko will get to you shortly~')
         return
     if hover_champ is not False:
@@ -84,7 +81,7 @@ async def pick(ctx):
         await bot.say(embed=embed)
 
         await bot.say("<@!{}> is hovering {}".format(ctx.message.author.id, hover_champ))
-        select = str(ctx.message.author) + '|' + hover_champ
+        select = ctx.message.author.id + '|' + hover_champ
         if str(hover_champ).lower() == 'neeko':
             await bot.say('Neeko is best decision :hearts:')
     else:
@@ -95,14 +92,14 @@ async def pick(ctx):
 async def lock(ctx):
     global select
     s_split = select.split('|')
-    if str(ctx.message.author) != s_split[0] and select != '':
+    if ctx.message.author.id != s_split[0] and select != '':
         await bot.say('Uh... Some one else is picking right now, Neeko will get to you shortly~')
         return
     await bot.say('Okie~')
     dataManager.pick_champ(s_split[0], s_split[1])
-    await bot.say("<@!{}> locked in ".format(ctx.message.author.id) + select.split('|')[1])
+    await bot.say("<@!{}> locked in ".format(s_split[0], s_split[1]))
     embed = discord.Embed()
-    embed.title = s_split[1] + " joined " + s_split[0][:-5] + "'s crew"
+    embed.title = s_split[1] + " joined " + str(ctx.message.author)[:-5] + "'s team"
     await bot.say(embed=embed)
     if select.split('|')[1] == 'Neeko':
         await bot.say("Neeko is joyful to be with you")
@@ -111,59 +108,102 @@ async def lock(ctx):
 
 @bot.command(pass_context=True)
 async def clear(ctx):
-    global clearing
-    if clearing != '':
+    global clearing_id
+    if not dataManager.started(ctx.message.author.id):
+        await bot.say("Sorry you don't have any champions...")
+        return
+    if clearing_id != '':
         await bot.say("there is someone clearing right now\n you can stop them then steal the cs with <n~steal>")
         return
-    clearing = ctx.message.author
+    clearing_id = ctx.message.author.id
     await bot.change_presence(game=discord.Game(name='Neeko sees people clearing minions'))
-    player = '<@!{}>'.format(ctx.message.author.id)
+    player = '<@!{}>'.format(clearing_id)
     clear_msg = await bot.say(player + " is now clearing the minions~")
     await asyncio.sleep(3)
     my_cs = 0
     global cs
-    print(str(clearing) + "is now clearing")
-    while cs > 0 and clearing == ctx.message.author:
+    print(str(ctx.message.author) + "is now clearing")
+    while cs > 0 and clearing_id == ctx.message.author.id:
         my_cs += 1
         cs -= 1
         await bot.edit_message(clear_msg, "{} cleared {} minions\n{} minions left".format(player, my_cs, cs))
         await asyncio.sleep(1)  # change this to stat check
-    dataManager.add_gold(str(ctx.message.author), my_cs*12)
+    dataManager.add_gold(ctx.message.author.id, my_cs * 12)
     await bot.say("{} earned {} gold for clearing~".format(player, my_cs*12))
 
     if cs == 0:
         await bot.change_presence(game=discord.Game(name='Neeko no minions'))
-        clearing = ''
+        clearing_id = ''
     return
 
 
 @bot.command(pass_context=True)
 async def steal(ctx):
-    global clearing
-    author = ctx.message.author
-    if clearing == '' or clearing == author:
+    global clearing_id
+    author_id = ctx.message.author.id
+    if clearing_id == '' or clearing_id == author_id:
         await bot.say("Neeko don't see what's there to steal")
     else:
-        old_player = '<@!{}>'.format(clearing.id)
-        new_player = '<@!{}>'.format(ctx.message.author.id)
+        old_player = '<@!{}>'.format(clearing_id)
+        new_player = '<@!{}>'.format(author_id)
         await bot.say("Oh! {} stopped {} from clearing the minions\n"
                       "use n~clear to finish the wave".format(new_player, old_player))
-        clearing = ''
+        clearing_id = ''
 
+
+@bot.command(pass_context=True)
+async def gold(ctx):
+    if not dataManager.started(ctx.message.author.id):
+        await bot.say("Sorry you don't have any champions...")
+        return
+    embed = discord.Embed()
+    embed.color = 0xe0ff2f
+    embed.set_thumbnail(url="http://ddragon.leagueoflegends.com/cdn/5.5.1/img/ui/gold.png")
+    embed.title = "{}'s account balance:".format(str(ctx.message.author)[:-5])
+    embed.description = "you currently have: {} gold".format(dataManager.get_gold(ctx.message.author.id))
+    await bot.say(embed=embed)
+
+
+@bot.command(pass_context=True)
+async def champ(ctx):
+    if not dataManager.started(ctx.message.author.id):
+        await bot.say("Sorry you don't have any champions...")
+        return
+    embed = discord.Embed()
+    embed.color = 0xe0ff2f
+    # embed.set_thumbnail(url="https://ddragon.leagueoflegends.com/cdn/9.1.1/img/champion/Teemo.png")
+    embed.title = "{}'s current team:".format(str(ctx.message.author)[:-5])
+    champs = dataManager.get_champs(ctx.message.author.id)
+    for stat in champs:
+        embed.add_field(name=stat.split('|')[0], value=stat.split('|')[1])
+    await bot.say(embed=embed)
+
+
+@bot.command(pass_context=True)
+async def mvp(ctx):
+    await bot.say('<@!{}> selected {} as their MVP'.format(
+        ctx.message.author.id, dataManager.change_mvp(ctx.message.author.id, ctx.message.content.split(' ')[1])))
+
+
+@bot.command(pass_context=True)
+async def info(ctx):
+    my_champ = dataManager.get_my_champ(ctx.message.author.id)
+    embed = discord.Embed()
+    embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}.jpg".format(my_champ[0]))
+    embed.title = str(ctx.message.author)[:-5] + "'s MVP: {}".format(my_champ[0].split('_')[0])
+    embed.description = my_champ[1]
+    await bot.say(embed=embed)
+
+
+# ------------------------------------------ Testing Commands ----------------------------------------------
 
 @bot.command(pass_context=True)
 async def cheat(ctx):
-    global cs
-    cs += 10
-    await bot.say('<@!{}> should be reported for spawning 10 minions'.format(ctx.message.author.id))
-    await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
-
-
-@bot.command(pass_context=True)
-async def test(ctx):
-    await bot.say('Okie~')
-    dataManager.add_champ(ctx.message.author, ctx.message.content[2:])
-    await bot.say("<@!{}> added ".format(ctx.message.author.id) + ctx.message.content[2:])
+    await bot.say("good summoners shouldn't cheat like <@!{}>".format(ctx.message.author.id))
+    # global cs
+    # cs += 10n~clear
+    # await bot.say('<@!{}> should be reported for spawning 10 minions'.format(ctx.message.author.id))
+    # await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
 
 bot.run('NTM0OTg5MTE4NzkxMjIxMjQ4.DyBn7g.q8t70y3DtaZLNw1HKCmQfY2t3Zk')

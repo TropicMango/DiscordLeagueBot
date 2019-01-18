@@ -1,44 +1,65 @@
+from pathlib import Path
+
+
 def pick_champ(player, champ):
-    with open("playerData.txt", "a") as f:
-        f.write(player + '~0' + '|' + '0\n')
-        # name~selectedID|gold
-        f.write(player + '|' + champ + '~100|0\n')
-        # name|champ~strength|skin~skin~skin
+    with open("./data/{}.txt".format(player), "w") as f:
+        f.write('g:0\n')  # gold
+        f.write('ID:0\n')  # selected champ | skin
+        f.write(champ + ':100|0\n')  # champ:strength|skin
 
 
 def started(player):
-    with open("playerData.txt", "r") as f:
-        line = f.readline()
-        while line:
-            if line.strip().startswith(player):
-                return True
-            line = f.readline()
-    return False
+    return Path('./data/{}.txt'.format(player)).is_file()
 
 
 def add_gold(player, amount):
-    return
-    with open("playerData.txt", "r") as f:
+    with open("./data/{}.txt".format(player), "r") as f:
         content = f.readlines()
-    # for x in range(len(content)):
-    #     line = content[x]
-    #     if line.startswith(player + '~'):
-    #         splice_line = line.split('|')
-    #         splice_line[1] = int(splice_line[1]) + amount
-    #         content[x] = '|'.join(splice_line)
-    #         print(content[x])
-    #     break
-    print('read')
-    with open("playerData.txt", "w") as f:
+    with open("./data/{}.txt".format(player), "w") as f:
         for line in content:
-            print(line + '------------')
-            if line.startswith(player + '~'):
-                print('found')
-                print(line)
-                splice_line = line.split('|')
-                splice_line[1] = int(splice_line[1]) + amount
-                splice_line = '|'.join(splice_line)
-                print(splice_line)
-                f.write(splice_line + '\n')
+            if line.startswith('g:'):
+                f.write('g:{}\n'.format(int(line.split(':')[1]) + amount))
             else:
-                f.write(line + '\n')
+                f.write(line)
+
+
+def get_gold(player):
+    with open("./data/{}.txt".format(player), "r") as f:
+        content = f.readlines()
+    return content[0][2:-1]
+
+
+def get_champs(player):
+    with open("./data/{}.txt".format(player), "r") as f:
+        content = f.readlines()
+    content.pop(0)
+    content.pop(0)
+    i = 0
+    final = []
+    for line in content:
+        final.append(line.split(':')[0] + "|ID: {}, Strength: {}".format(i, line.split(':')[1].split('|')[0]))
+        i += 1
+    return final
+
+
+def get_my_champ(player):
+    with open("./data/{}.txt".format(player), "r") as f:
+        content = f.readlines()
+    selected_champ = int(content[1][3:]) + 2
+    split_champ = content[selected_champ].split(':')
+    final = ['{}_{}'.format(split_champ[0], split_champ[1].split('|')[1][:-1]),
+             'Strength: {} mangos'.format(split_champ[1].split('|')[0])]
+    return final
+
+
+def change_mvp(player, ide):
+    with open("./data/{}.txt".format(player), "r") as f:
+        content = f.readlines()
+    new_champ = content[int(ide) + 2].split(':')[0]
+    with open("./data/{}.txt".format(player), "w") as f:
+        for line in content:
+            if line.startswith('ID:'):
+                f.write('ID:{}\n'.format(ide))
+            else:
+                f.write(line)
+    return new_champ
