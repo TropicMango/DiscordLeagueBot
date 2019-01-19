@@ -1,4 +1,4 @@
-g:5395
-ID:0
-Katarina lv:1|100|10
-Syndra lv:1|100|4
+g:5437
+ID:2
+Katarina|2|2|105|10
+Syndra|1|0|100|4

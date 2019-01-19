@@ -1,6 +1,9 @@
-g:6395
+g:10766
 ID:2
-Neeko lv:1|100|0
-Rammus lv:1|100|0
-Teemo lv:1|100||0
-Zed lv:1|100|0
+Neeko|26|601|225|0
+Thresh|1|0|100|0
+Illaoi|1|0|100|0
+Zac|1|0|100|1
+Zac|1|0|100|1
+Fiddlesticks|1|0|100|0
+Tristana|1|0|100|6

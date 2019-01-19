@@ -46,7 +46,7 @@ champList = [
     "jayc|Jayce|4",
     "jhin|Jhin|4",
     "jinx|Jinx|6",
-    "kais|Kai'Sa|3",
+    "kais|Kaisa|3",
     "kali|Kalista|3",
     "karm|Karma|7",
     "kart|Karthus|6",
@@ -89,7 +89,7 @@ champList = [
     "quin|Quinn|4",
     "raka|Rakan|3",
     "ramm|Rammus|8",
-    "reks|Rek'Sai|2",
+    "reks|RekSai|2",
     "rene|Renekton|10",
     "reng|Rengar|4",
     "rive|Riven|9",
@@ -130,7 +130,7 @@ champList = [
     "vlad|Vladimir|8",
     "voli|Volibear|5",
     "warw|Warwick|10",
-    "wuko|Wukong|6",
+    "wuko|Wukong|5",
     "xaya|Xayah|3",
     "xera|Xerath|4",
     "xinz|XinZhao|8",
@@ -155,6 +155,6 @@ for champ in champList:
     s = champ
     conv = ''.join(list(filter(str.isalnum, s)))
     conv = conv.lower()[:4]
-    print('"' + champ + '|' + str(skins[i]) + '",' )
+    print('"' + champ + '|100|100",' )
     i += 1
 

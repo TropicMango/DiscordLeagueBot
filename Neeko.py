@@ -1,6 +1,8 @@
 import discord
 import asyncio
 import random
+import time
+import math
 from discord.ext import commands
 from DiscordLeague import LolChampList, dataManager
 
@@ -8,7 +10,7 @@ description = '''An example bot to showcase the discord.ext.commands extension
 module.
 There are a number of utility commands being showcased here.'''
 bot = commands.Bot(command_prefix='n~', description=description)
-
+bot.remove_command("help")
 
 cs = 0
 arr = [0, 0, 0]
@@ -17,13 +19,14 @@ clearing_id = ''
 challenge_id = ''
 invader = ''
 latest_channel = ''
+stun = []
 
 
 async def summon_minions():
     global cs
     global arr
     global invader
-    invade_val = random.randrange(60, 300)
+    invade_val = random.randrange(30, 60)
     i = 0
     while True:
         await asyncio.sleep(random.randrange(5, 30))
@@ -35,21 +38,20 @@ async def summon_minions():
             await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
         if i == invade_val:
-            await asyncio.sleep(random.randrange(600, 1200))
             invader = LolChampList.generate()
-            if random.random() > 0.7:
-                invader += '_{}'.format(random.randrange(1, LolChampList.get_skins(invader)))
+            if random.random() > 0.6:
+                invader += '_{}'.format(random.randrange(0, LolChampList.get_skins(invader)))
             else:
                 invader += '_0'
             embed = discord.Embed()
+            embed.color = 0xe0ff2f
             embed.title = "Oh no we got a invader!"
             embed.description = "use n~c <champion> to challenge him"
             embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
             print("https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
             await bot.send_message(latest_channel, embed=embed)
-            invade_val = random.randrange(60, 300)
-
-
+            invade_val = random.randrange(60, 120)
+            i = 0
 
 
 @bot.event
@@ -124,6 +126,7 @@ async def lock(ctx):
     dataManager.pick_champ(s_split[0], s_split[1])
     await bot.say("<@!{}> locked in ".format(s_split[0], s_split[1]))
     embed = discord.Embed()
+    embed.color = 0xe0ff2f
     embed.title = s_split[1] + " joined " + str(ctx.message.author)[:-5] + "'s team"
     await bot.say(embed=embed)
     if select.split('|')[1] == 'Neeko':
@@ -152,10 +155,13 @@ async def clear(ctx):
         my_cs += 1
         cs -= 1
         await bot.edit_message(clear_msg, "{} cleared {} minions\n{} minions left".format(player, my_cs, cs))
-        await asyncio.sleep(1)  # change this to stat check
-    dataManager.add_gold(ctx.message.author.id, my_cs * 5)
-    await bot.say("{} earned {} gold for clearing~".format(player, my_cs*5))
+        await asyncio.sleep(10 / math.sqrt(int(dataManager.get_my_strength(ctx.message.author.id))))
 
+    members = 0
+    for user in ctx.message.server.members:
+        if user.status != discord.Status.offline and not user.bot:
+            members += 1
+    await bot.say(dataManager.add_gold(ctx.message.author.id, my_cs, members))
     if cs == 0:
         await bot.change_presence(game=discord.Game(name='Neeko no minions'))
         clearing_id = ''
@@ -186,8 +192,10 @@ async def c(ctx):
         return
     await bot.say("Neeko doesn't know how fighting works yet...")
     await bot.say("But they join your team~")
+    dataManager.add_champ(ctx.message.author.id, invader.split('_')[0], invader.split('_')[1])
     embed = discord.Embed()
-    embed.title = '{} decided to join your team! (not really)'.format(invader.split('_')[0])
+    embed.color = 0xe0ff2f
+    embed.title = '{} decided to join your team!'.format(invader.split('_')[0])
     await bot.say(embed=embed)
 
 
@@ -205,7 +213,7 @@ async def gold(ctx):
 
 
 @bot.command(pass_context=True)
-async def champ(ctx):
+async def team(ctx):
     if not dataManager.started(ctx.message.author.id):
         await bot.say("Sorry you don't have any champions...")
         return
@@ -221,8 +229,13 @@ async def champ(ctx):
 
 @bot.command(pass_context=True)
 async def mvp(ctx):
-    await bot.say('<@!{}> selected {} as their MVP'.format(
-        ctx.message.author.id, dataManager.change_mvp(ctx.message.author.id, ctx.message.content.split(' ')[1])))
+    try:
+        await bot.say('<@!{}> selected {} as their MVP'.format(
+            ctx.message.author.id, dataManager.change_mvp(ctx.message.author.id, ctx.message.content.split(' ')[1])))
+    except IndexError:
+        await bot.say("Sorry but Neeko don't think you entered a champion number...")
+    except discord.ext.commands.errors.CommandInvokeError:
+        await bot.say("Sorry but Neeko don't think you have a champion of that number...")
 
 
 @bot.command(pass_context=True)
@@ -232,6 +245,36 @@ async def info(ctx):
     embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}.jpg".format(my_champ[0]))
     embed.title = str(ctx.message.author)[:-5] + "'s MVP: {}".format(my_champ[0].split('_')[0])
     embed.description = my_champ[1]
+    await bot.say(embed=embed)
+
+
+@bot.command()
+async def shop():
+    embed = discord.Embed(color=0x71f442)
+    embed.title = 'Hey look Neeko sees the shop~'
+    embed.add_field(name='item1', value='does things')
+    embed.add_field(name='item2', value='does things')
+    embed.add_field(name='item3', value='does things')
+    embed.add_field(name='item4', value='does things')
+    embed.add_field(name='item5', value='does things')
+    embed.add_field(name='item6', value='does things')
+    embed.add_field(name='item7', value='does things')
+    embed.add_field(name='item8', value='does things')
+    embed.add_field(name='item9', value='does things')
+    await bot.say(embed=embed)
+
+
+@bot.command()
+async def help():
+    embed = discord.Embed()
+    embed.title = "Neeko's available commands: "
+    embed.description = "n~start: basic information to start the game\n" \
+                        "n~clear: clear the minions to earn gold\n" \
+                        "n~steal: interrupt someone from clearing so you can clear\n" \
+                        "n~team: shows a list of your team\n" \
+                        "n~mvp: change the mvp of your team\n" \
+                        "n~info: shows information on your mvp\n" \
+                        "n~shop: uh... good question XD"
     await bot.say(embed=embed)
 
 
@@ -255,8 +298,8 @@ async def cheat(ctx):
 
 # @bot.command(pass_context=True)
 # async def test(ctx):
-#     global latest_channel
-#     latest_channel = ctx.message.channel
-#     await summon_champion()
+#     for user in ctx.message.server.members:
+#         if user.status != discord.Status.offline and !user.bot:
+#             i += 1
 
 bot.run('NTM0OTg5MTE4NzkxMjIxMjQ4.DyBn7g.q8t70y3DtaZLNw1HKCmQfY2t3Zk')
