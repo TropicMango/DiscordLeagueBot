@@ -19,7 +19,8 @@ clearing_id = ''
 challenge_id = ''
 invader = ''
 latest_channel = ''
-stun = []
+stun_list = []
+clear_scaling = 0.6
 
 
 async def summon_minions():
@@ -39,7 +40,7 @@ async def summon_minions():
 
         if i == invade_val:
             invader = LolChampList.generate()
-            if random.random() > 0.6:
+            if random.random() > 0.7:
                 invader += '_{}'.format(random.randrange(0, LolChampList.get_skins(invader)))
             else:
                 invader += '_0'
@@ -50,7 +51,7 @@ async def summon_minions():
             embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
             print("https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
             await bot.send_message(latest_channel, embed=embed)
-            invade_val = random.randrange(60, 120)
+            invade_val = random.randrange(120, 300)
             i = 0
 
 
@@ -143,6 +144,14 @@ async def clear(ctx):
     if clearing_id != '':
         await bot.say("there is someone clearing right now\n you can stop them then steal the cs with <n~steal>")
         return
+    for x in range(len(stun_list)):
+        name = stun_list[x]
+        if name.startswith(ctx.message.author.id):
+            if float(name.split('|')[1]) > time.time():
+                await bot.say("Sorry you are stunned right now")
+                return
+            else:
+                stun_list.pop(x)
     clearing_id = ctx.message.author.id
     await bot.change_presence(game=discord.Game(name='Neeko sees people clearing minions'))
     player = '<@!{}>'.format(clearing_id)
@@ -155,7 +164,7 @@ async def clear(ctx):
         my_cs += 1
         cs -= 1
         await bot.edit_message(clear_msg, "{} cleared {} minions\n{} minions left".format(player, my_cs, cs))
-        await asyncio.sleep(10 / math.sqrt(int(dataManager.get_my_strength(ctx.message.author.id))))
+        await asyncio.sleep(10 / math.pow(int(dataManager.get_my_strength(ctx.message.author.id)), clear_scaling))
 
     members = 0
     for user in ctx.message.server.members:
@@ -169,7 +178,7 @@ async def clear(ctx):
 
 
 @bot.command(pass_context=True)
-async def steal(ctx):
+async def stun(ctx):
     global clearing_id
     author_id = ctx.message.author.id
     if clearing_id == '' or clearing_id == author_id:
@@ -177,13 +186,18 @@ async def steal(ctx):
     else:
         old_player = '<@!{}>'.format(clearing_id)
         new_player = '<@!{}>'.format(author_id)
-        await bot.say("Oh! {} stopped {} from clearing the minions\n"
+        await bot.say("Oh! {} stunned {} for 60 seconds\n"
                       "use n~clear to finish the wave".format(new_player, old_player))
+        stun_list.append('{}|{}'.format(clearing_id, time.time() + 60))
         clearing_id = ''
 
 
 @bot.command(pass_context=True)
 async def c(ctx):
+    if not dataManager.started(ctx.message.author.id):
+        await bot.say("Sorry you don't have any champions...")
+        return
+    global invader
     if invader == '':
         await bot.say("Currently no challengers")
         return
@@ -196,6 +210,7 @@ async def c(ctx):
     embed = discord.Embed()
     embed.color = 0xe0ff2f
     embed.title = '{} decided to join your team!'.format(invader.split('_')[0])
+    invader = ''
     await bot.say(embed=embed)
 
 
@@ -244,7 +259,8 @@ async def info(ctx):
     embed = discord.Embed()
     embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}.jpg".format(my_champ[0]))
     embed.title = str(ctx.message.author)[:-5] + "'s MVP: {}".format(my_champ[0].split('_')[0])
-    embed.description = my_champ[1]
+    embed.description = my_champ[1] + '\nClears at {} minions per second'\
+        .format(round(1/(10 / math.pow(int(dataManager.get_my_strength(ctx.message.author.id)), clear_scaling)), 2))
     await bot.say(embed=embed)
 
 
@@ -270,7 +286,7 @@ async def help():
     embed.title = "Neeko's available commands: "
     embed.description = "n~start: basic information to start the game\n" \
                         "n~clear: clear the minions to earn gold\n" \
-                        "n~steal: interrupt someone from clearing so you can clear\n" \
+                        "n~stun: interrupt someone from clearing so you can clear\n" \
                         "n~team: shows a list of your team\n" \
                         "n~mvp: change the mvp of your team\n" \
                         "n~info: shows information on your mvp\n" \
@@ -281,7 +297,8 @@ async def help():
 @bot.event
 async def on_message(message):
     global latest_channel
-    latest_channel = message.channel
+    if latest_channel != '':
+        latest_channel = message.channel
     await bot.process_commands(message)
 
 

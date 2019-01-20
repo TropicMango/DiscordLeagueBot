@@ -24,7 +24,7 @@ def add_gold(player, cs, members):
         content = f.readlines()
     leveled_up = False
     split_champ = content[int(content[1][3:])].split('|')
-    current_exp = int(split_champ[2]) + amount
+    current_exp = float(split_champ[2]) + amount
     current_lv = int(split_champ[1])
     while current_exp > math.pow(current_lv, 2):
         current_exp -= math.pow(current_lv, 2)

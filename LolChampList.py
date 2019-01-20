@@ -61,7 +61,7 @@ champList = [
     "kind|Kindred|2",
     "kled|Kled|2",
     "kogm|KogMaw|10",
-    "lebl|LeBlanc|6",
+    "lebl|Leblanc|6",
     "lees|LeeSin|9",
     "leon|Leona|8",
     "liss|Lissandra|4",
