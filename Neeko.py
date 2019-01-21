@@ -39,6 +39,9 @@ async def summon_minions():
             await bot.change_presence(game=discord.Game(name='Neeko sees {} minions'.format(cs)))
 
         if i == invade_val:
+            i = 0
+            if latest_channel == '':
+                continue
             invader = LolChampList.generate()
             if random.random() > 0.7:
                 invader += '_{}'.format(random.randrange(0, LolChampList.get_skins(invader)))
@@ -52,7 +55,6 @@ async def summon_minions():
             print("https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{}.jpg".format(invader))
             await bot.send_message(latest_channel, embed=embed)
             invade_val = random.randrange(120, 300)
-            i = 0
 
 
 @bot.event
@@ -297,7 +299,7 @@ async def help():
 @bot.event
 async def on_message(message):
     global latest_channel
-    if latest_channel != '':
+    if latest_channel == '':
         latest_channel = message.channel
     await bot.process_commands(message)
 
