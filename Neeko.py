@@ -144,7 +144,7 @@ async def clear(ctx):
         await bot.say("Sorry you don't have any champions...")
         return
     if clearing_id != '':
-        await bot.say("there is someone clearing right now\n you can stop them then steal the cs with <n~steal>")
+        await bot.say("there is someone clearing right now\n you can stop them with <n~stun>")
         return
     for x in range(len(stun_list)):
         name = stun_list[x]
@@ -154,6 +154,7 @@ async def clear(ctx):
                 return
             else:
                 stun_list.pop(x)
+                continue
     clearing_id = ctx.message.author.id
     await bot.change_presence(game=discord.Game(name='Neeko sees people clearing minions'))
     player = '<@!{}>'.format(clearing_id)
@@ -184,13 +185,13 @@ async def stun(ctx):
     global clearing_id
     author_id = ctx.message.author.id
     if clearing_id == '' or clearing_id == author_id:
-        await bot.say("Neeko don't see what's there to steal")
+        await bot.say("Neeko don't see who's there to stun")
     else:
         old_player = '<@!{}>'.format(clearing_id)
         new_player = '<@!{}>'.format(author_id)
-        await bot.say("Oh! {} stunned {} for 60 seconds\n"
+        await bot.say("Oh! {} stunned {} for 10 seconds\n"
                       "use n~clear to finish the wave".format(new_player, old_player))
-        stun_list.append('{}|{}'.format(clearing_id, time.time() + 60))
+        stun_list.append('{}|{}'.format(clearing_id, time.time() + 10))
         clearing_id = ''
 
 
@@ -249,6 +250,7 @@ async def mvp(ctx):
     try:
         await bot.say('<@!{}> selected {} as their MVP'.format(
             ctx.message.author.id, dataManager.change_mvp(ctx.message.author.id, ctx.message.content.split(' ')[1])))
+        await display_info(ctx)
     except IndexError:
         await bot.say("Sorry but Neeko don't think you entered a champion number...")
     except discord.ext.commands.errors.CommandInvokeError:
@@ -257,12 +259,16 @@ async def mvp(ctx):
 
 @bot.command(pass_context=True)
 async def info(ctx):
+    await display_info(ctx)
+
+
+async def display_info(ctx):
     my_champ = dataManager.get_my_champ(ctx.message.author.id)
     embed = discord.Embed()
     embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}.jpg".format(my_champ[0]))
     embed.title = str(ctx.message.author)[:-5] + "'s MVP: {}".format(my_champ[0].split('_')[0])
-    embed.description = my_champ[1] + '\nClears at {} minions per second'\
-        .format(round(1/(10 / math.pow(int(dataManager.get_my_strength(ctx.message.author.id)), clear_scaling)), 2))
+    embed.description = my_champ[1] + '\nClears at {} minions per second' \
+        .format(round(1 / (10 / math.pow(int(dataManager.get_my_strength(ctx.message.author.id)), clear_scaling)), 2))
     await bot.say(embed=embed)
 
 
