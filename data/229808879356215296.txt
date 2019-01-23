@@ -1,6 +1,12 @@
-g:4049
+g:8846
 ID:2
-Caitlyn|23|89.0|210|0
+Caitlyn|30|126.0|245|0
 Kennen|1|0|100|2
 Karma|1|0|100|6
 Gragas|1|0|100|0
+Gragas|1|0|100|0
+Sivir|1|0|100|0
+Kalista|1|0|100|1
+Yasuo|1|0|100|0
+Warwick|1|0|100|0
+Bard|1|0|100|0

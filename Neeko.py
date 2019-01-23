@@ -12,7 +12,7 @@ There are a number of utility commands being showcased here.'''
 bot = commands.Bot(command_prefix='n~', description=description)
 bot.remove_command("help")
 
-cs = 0
+cs = 50
 arr = [0, 0, 0]
 select = ''
 clearing_id = ''
@@ -146,7 +146,10 @@ async def clear(ctx):
     if clearing_id != '':
         await bot.say("there is someone clearing right now\n you can stop them with <n~stun>")
         return
+    print(len(stun_list))
+    print(range(len(stun_list)))
     for x in range(len(stun_list)):
+        print(x)
         name = stun_list[x]
         if name.startswith(ctx.message.author.id):
             if float(name.split('|')[1]) > time.time():
@@ -154,7 +157,7 @@ async def clear(ctx):
                 return
             else:
                 stun_list.pop(x)
-                continue
+                break
     clearing_id = ctx.message.author.id
     await bot.change_presence(game=discord.Game(name='Neeko sees people clearing minions'))
     player = '<@!{}>'.format(clearing_id)
