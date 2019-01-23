@@ -75,6 +75,14 @@ def get_my_champ(player):
     return final
 
 
+def get_my_champ_name(player):
+    with open("./data/{}.txt".format(player), "r") as f:
+        content = f.readlines()
+    split_champ = content[int(content[1][3:])].split('|')
+    final = split_champ[0]
+    return final
+
+
 def get_my_strength(player):
     with open("./data/{}.txt".format(player), "r") as f:
         content = f.readlines()

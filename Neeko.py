@@ -21,6 +21,7 @@ invader = ''
 latest_channel = ''
 stun_list = []
 clear_scaling = 0.6
+skin_info = []
 
 
 async def summon_minions():
@@ -146,10 +147,7 @@ async def clear(ctx):
     if clearing_id != '':
         await bot.say("there is someone clearing right now\n you can stop them with <n~stun>")
         return
-    print(len(stun_list))
-    print(range(len(stun_list)))
     for x in range(len(stun_list)):
-        print(x)
         name = stun_list[x]
         if name.startswith(ctx.message.author.id):
             if float(name.split('|')[1]) > time.time():
@@ -275,20 +273,51 @@ async def display_info(ctx):
     await bot.say(embed=embed)
 
 
-@bot.command()
-async def shop():
+@bot.command(pass_context=True)
+async def shop(ctx):
+    if len(ctx.message.content) == 6:
+        await default_shop_menu(ctx)
+        return
+    sec = ctx.message.content.split(' ')[1]
+    if sec == '1':
+        await skin_shop_menu(ctx)
+
+
+async def default_shop_menu(ctx):
     embed = discord.Embed(color=0x71f442)
     embed.title = 'Hey look Neeko sees the shop~'
-    embed.add_field(name='item1', value='does things')
-    embed.add_field(name='item2', value='does things')
-    embed.add_field(name='item3', value='does things')
-    embed.add_field(name='item4', value='does things')
-    embed.add_field(name='item5', value='does things')
-    embed.add_field(name='item6', value='does things')
-    embed.add_field(name='item7', value='does things')
-    embed.add_field(name='item8', value='does things')
-    embed.add_field(name='item9', value='does things')
+    embed.add_field(name='Skins', value='<n~shop 1>: Get Skins for your MVP', inline=False)
+    embed.add_field(name='Items', value='<n~shop 2>: Get Items for your MVP', inline=False)
+    await bot.send_message(ctx.message.channel, embed=embed)
+
+
+async def skin_shop_menu(ctx):
+    global skin_info
+    embed = discord.Embed(color=0x71f442)
+    embed.title = 'Oh these skins are pretty~'
+    embed.description = 'Default Skin, use n~n to next skin'
+    my_champ = dataManager.get_my_champ_name(ctx.message.author.id)
+    embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}_0.jpg".format(my_champ))
+    await bot.send_message(ctx.message.channel, embed=embed)
+    skin_info = [ctx.message.author.id, 0,
+                 LolChampList.get_skins(dataManager.get_my_champ_name(ctx.message.author.id))]
+
+
+@bot.command(pass_context=True)
+async def n(ctx):
+    global skin_info
+    if skin_info[0] != str(ctx.message.author.id):
+        bot.say('Someone is trying to shop right now~')
+        return
+    skin_num = (int(skin_info[1]) + 1) % (skin_info[2]+1)
+    embed = discord.Embed(color=0x71f442)
+    embed.title = 'Oh these skins are pretty~'
+    embed.description = 'Skin #{}, use n~n to next skin'.format(skin_num)
+    my_champ = dataManager.get_my_champ_name(ctx.message.author.id)
+    embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}_{}.jpg"
+                        "".format(my_champ, skin_num))
     await bot.say(embed=embed)
+    skin_info[1] = skin_num
 
 
 @bot.command()
@@ -303,6 +332,14 @@ async def help():
                         "n~info: shows information on your mvp\n" \
                         "n~shop: uh... good question XD"
     await bot.say(embed=embed)
+
+
+@bot.command(pass_context=True)
+async def dev(ctx, item):
+    if not str(ctx.message.author.id) == '297971074518351872':
+        await bot.say("Sorry~ this one's only for mango")
+        return
+    await bot.say("Dev detected: {}".format(item))
 
 
 @bot.event
