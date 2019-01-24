@@ -66,13 +66,19 @@ def get_champs(player):
     return final
 
 
-def get_my_champ(player):
+def get_champ(player, index):
     with open("./data/{}.txt".format(player), "r") as f:
         content = f.readlines()
-    split_champ = content[int(content[1][3:])].split('|')
+    split_champ = content[index + 1].split('|')
     final = ['{}_{}'.format(split_champ[0], split_champ[4][:-1]),
              'Lv: {}, Strength: {} mangos'.format(split_champ[1], split_champ[3])]
     return final
+
+
+def get_my_champ(player):
+    with open("./data/{}.txt".format(player), "r") as f:
+        content = f.readlines()
+    return get_champ(player, int(content[1][3:]) - 1)
 
 
 def get_my_champ_name(player):
@@ -83,10 +89,16 @@ def get_my_champ_name(player):
     return final
 
 
+def get_strength(player, index):
+    with open("./data/{}.txt".format(player), "r") as f:
+        content = f.readlines()
+    return content[index + 1].split('|')[3]
+
+
 def get_my_strength(player):
     with open("./data/{}.txt".format(player), "r") as f:
         content = f.readlines()
-    return content[int(content[1][3:])].split('|')[3]
+    return get_strength(player, int(content[1][3:]) - 1)
 
 
 def change_mvp(player, mvp):

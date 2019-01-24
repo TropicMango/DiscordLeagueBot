@@ -251,7 +251,7 @@ async def mvp(ctx):
     try:
         await bot.say('<@!{}> selected {} as their MVP'.format(
             ctx.message.author.id, dataManager.change_mvp(ctx.message.author.id, ctx.message.content.split(' ')[1])))
-        await display_info(ctx)
+        await display_my_info(ctx)
     except IndexError:
         await bot.say("Sorry but Neeko don't think you entered a champion number...")
     except discord.ext.commands.errors.CommandInvokeError:
@@ -260,16 +260,29 @@ async def mvp(ctx):
 
 @bot.command(pass_context=True)
 async def info(ctx):
-    await display_info(ctx)
+    if len(ctx.message.content) == 6:
+        await display_my_info(ctx)
+    else:
+        await display_info(ctx, int(ctx.message.content.split(' ')[1]))
 
 
-async def display_info(ctx):
+async def display_my_info(ctx):
     my_champ = dataManager.get_my_champ(ctx.message.author.id)
     embed = discord.Embed()
     embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}.jpg".format(my_champ[0]))
     embed.title = str(ctx.message.author)[:-5] + "'s MVP: {}".format(my_champ[0].split('_')[0])
     embed.description = my_champ[1] + '\nClears at {} minions per second' \
         .format(round(1 / (10 / math.pow(int(dataManager.get_my_strength(ctx.message.author.id)), clear_scaling)), 2))
+    await bot.say(embed=embed)
+
+
+async def display_info(ctx, index):
+    my_champ = dataManager.get_champ(ctx.message.author.id, index)
+    embed = discord.Embed()
+    embed.set_image(url="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{}.jpg".format(my_champ[0]))
+    embed.title = str(ctx.message.author)[:-5] + "'s MVP: {}".format(my_champ[0].split('_')[0])
+    embed.description = my_champ[1] + '\nClears at {} minions per second' \
+        .format(round(1 / (10 / math.pow(int(dataManager.get_strength(ctx.message.author.id, index)), clear_scaling)), 2))
     await bot.say(embed=embed)
 
 
