@@ -21,7 +21,7 @@ champList = [
     "chog|Chogath|7",
     "cork|Corki|8",
     "dari|Darius|7",
-    "dian|Diana|5",
+    "dian|Diana|4",
     "drmu|DrMundo|10",
     "drav|Draven|7",
     "ekko|Ekko|5",
