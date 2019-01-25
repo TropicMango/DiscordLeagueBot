@@ -4,7 +4,7 @@ import random
 import time
 import math
 from discord.ext import commands
-from DiscordLeague import LolChampList, dataManager
+from DiscordLeague import LolChampList, dataManager, SecretFile
 
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
@@ -148,14 +148,13 @@ async def clear(ctx):
         await bot.say("there is someone clearing right now\n you can stop them with <n~stun>")
         return
     for x in range(len(stun_list)):
-        name = stun_list[x]
+        name = stun_list[len(stun_list) - x - 1]
         if name.startswith(ctx.message.author.id):
             if float(name.split('|')[1]) > time.time():
                 await bot.say("Sorry you are stunned right now")
                 return
             else:
                 stun_list.pop(x)
-                break
     clearing_id = ctx.message.author.id
     await bot.change_presence(game=discord.Game(name='Neeko sees people clearing minions'))
     player = '<@!{}>'.format(clearing_id)
@@ -380,4 +379,4 @@ async def cheat(ctx):
 #         if user.status != discord.Status.offline and !user.bot:
 #             i += 1
 
-bot.run('NTM0OTg5MTE4NzkxMjIxMjQ4.DyBn7g.q8t70y3DtaZLNw1HKCmQfY2t3Zk')
+bot.run(SecretFile.get_token())
