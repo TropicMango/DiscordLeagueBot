@@ -347,11 +347,11 @@ async def help():
 
 
 @bot.command(pass_context=True)
-async def dev(ctx, item):
+async def dev(ctx):
     if not str(ctx.message.author.id) == '297971074518351872':
         await bot.say("Sorry~ this one's only for mango")
         return
-    await bot.say("Dev detected: {}".format(item))
+    await bot.say("Dev detected: {}".format('<:Diamond_Rank:559571584201916426>'))
 
 
 @bot.event
